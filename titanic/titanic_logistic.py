@@ -11,7 +11,7 @@ from sklearn.linear_model import LogisticRegression
 train_data = pd.read_csv('data/train.csv')
 test_data = pd.read_csv('data/test.csv')
 print('Train dataset: %s, test data %s' %(str(train_data.shape), str(test_data.shape)))
-print(train_data.head(10))
+print(train_data)
 
 
 #Check for missing data & list them 

@@ -1,14 +1,11 @@
-import numpy as np 
-import tflearn as tf
+import numpy as np
+import tflearn
 import pandas as pd
-import tensorflow
-
 
 #Load data
 train_data = pd.read_csv('data/train.csv')
 test_data = pd.read_csv('data/test.csv')
 print('Train dataset: %s, test data %s' %(str(train_data.shape), str(test_data.shape)))
-print(train_data.head(10))
 
 
 #Check for missing data & list them 
@@ -96,33 +93,37 @@ del test_data['Embarked']
 print "=============== After Cleaning Data ========================="
 print train_data.head(10)
 
+print('train dataset: %s, test dataset %s' %(str(train_data.shape), str(test_data.shape)) )
+
 del train_data['PassengerId']
-X_train = train_data.drop("Survived",axis=1)
-Y_train = train_data["Survived"]
-Y_train = np.expand_dims(Y_train, axis = 1)
-X_test  = test_data.drop("PassengerId",axis=1).copy()
-print('X_train dataset: %s, Y_train dataset: %s, X_test dataset %s' %(str(X_train.shape), str(Y_train.shape), str(X_test.shape)) )
+X_train = train_data.drop("Survived",axis=1).as_matrix()
+Y_train = train_data["Survived"].as_matrix().reshape((891,1))
+X_test  = test_data.drop("PassengerId",axis=1).as_matrix()
 
-tensorflow.reset_default_graph()
+print "X_train.shape", X_train
+print "Y_train.shape", Y_train.shape
+print "X_test.shape", X_test.shape
 
-net = tf.input_data(shape=[None, 6])
 
-# Hidden layer(s)
-net = tf.fully_connected(net, 32)
-net = tf.fully_connected(net, 32)
-net = tf.fully_connected(net, 1, activation='softmax')
-net = tf.regression(net)
+# Build neural network
+net = tflearn.input_data(shape=[None, 6])
+net = tflearn.fully_connected(net, 32)
+net = tflearn.fully_connected(net, 32)
+net = tflearn.fully_connected(net, 1, activation='softmax')
+net = tflearn.regression(net)
 
 # Define model
-model = tf.DNN(net)
+model = tflearn.DNN(net)
 # Start training (apply gradient descent algorithm)
-model.fit(np.array(X_train), np.array(Y_train), n_epoch=10, batch_size=16, show_metric=True)
+model.fit(X_train, Y_train, n_epoch=10, batch_size=16, show_metric=True)
 
-
-def prediction(predictions):
-    return np.argmax(predictions,1)
-
-predictions = prediction(model.predict(X_test))
-print predictions
+# # Let's create some data for DiCaprio and Winslet
+# dicaprio = [3, 'Jack Dawson', 'male', 19, 0, 0, 'N/A', 5.0000]
+# winslet = [1, 'Rose DeWitt Bukater', 'female', 17, 1, 2, 'N/A', 100.0000]
+# # Preprocess data
+# dicaprio, winslet = preprocess([dicaprio, winslet], to_ignore)
+# # Predict surviving chances (class 1 results)
+pred = model.predict(X_test)
+print pred
 # print("DiCaprio Surviving Rate:", pred[0][1])
 # print("Winslet Surviving Rate:", pred[1][1])
